@@ -25,14 +25,9 @@ import com.nephoapp.anarxiv.R;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
@@ -50,14 +45,16 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 
-
+/**
+ * @author lihe
+ *
+ */
 public class PaperListWnd extends Activity implements OnItemClickListener, OnScrollListener
 {
 	/** ui components. */
 	ListView _uiPaperList = null;
 	TextView _uiCategoryName = null;
 	ProgressDialog _uiBusyBox = null;
-	ProgressDialog _uiNoNetBox = null;
 	
 	/** adapter for paper list. */
 	SimpleAdapter _uiPaperListAdapter = null;
@@ -110,7 +107,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 	/**
 	 * Loading thread.
 	 */
-	public class ArxivLoadingThread extends Thread
+	private class ArxivLoadingThread extends Thread
 	{
 		public synchronized void run()
 		{
@@ -120,108 +117,64 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 			try
 			{	
 				/* get data. */
-			//	ArrayList<ArxivLoader.Paper> newPaperList = _arxivLoader.loadPapers(_paperCategory);
 				List<Map<String, Object>> paperMapList = _arxivLoader.loadPapers(_paperCategory);
 				_paperMapList.addAll(paperMapList);
-					
-				/* send message. */
-				PaperDataHandler handler = new PaperDataHandler(mainLooper);
-				handler.removeMessages(0);
-				handler.sendEmptyMessage(0);
+				
+				PaperListWnd.this.runOnUiThread(new Runnable()
+						{
+							public void run()
+							{
+								if (_uiPaperListAdapter == null)
+								{
+									_uiPaperListAdapter = new SimpleAdapter(PaperListWnd.this,
+																			_paperMapList,
+																			R.layout.paper_list_item,
+																			new String[] {"title", 
+																						  "date", 
+																						  "author"},
+																			new int[] {R.id.paperitem_title, 
+																					   R.id.paperitem_date, 
+																					   R.id.paperitem_author});
+									_uiPaperList.setAdapter(_uiPaperListAdapter);
+								}
+								else
+								{
+									/* notify the view that the data has changed. */
+									_uiPaperListAdapter.notifyDataSetChanged();
+								}
+								
+								if (_uiBusyBox != null)
+								{
+									_uiBusyBox.dismiss();
+									_uiBusyBox = null;
+								}
+								
+								_isLoading = false;
+							}
+						});
 			}
 			catch(ArxivLoader.LoaderException e)
-			{
-//				new AlertDialog.Builder(PaperListWnd.this).setTitle(R.string.error_dialog_title)
-//							   .setMessage(e.getMessage())
-//							   .setPositiveButton(R.string.confirm_btn_caption, null)
-//							   .show();
+			{	
+				final ArxivLoader.LoaderException err = e;
 				
-				ExceptionHandler handler = new ExceptionHandler(mainLooper);
-				Message msg = handler.obtainMessage(0, e.getMessage());
-				handler.removeMessages(0);
-				handler.sendMessage(msg);
+				PaperListWnd.this.runOnUiThread(new Runnable()
+					{
+						public void run()
+						{
+							/* dismiss busy box if any. */
+							if (_uiBusyBox != null)
+							{
+								_uiBusyBox.dismiss();
+								_uiBusyBox = null;
+							}
+							
+							_isLoading = false;
+							
+							/* show error message. */
+							UiUtils.showErrorMessage(PaperListWnd.this, err.getMessage());
+						}
+					});
 			}
-		}
-	}
-	
-	/**
-	 * handler for handling paper data.
-	 */
-	private class PaperDataHandler extends Handler
-	{
-		/**
-		 * 
-		 */
-		public PaperDataHandler(Looper looper)
-		{
-			super(looper);
-		}
-		
-		/**
-		 * handler.
-		 */
-		@Override
-		public void handleMessage(Message msg)
-		{	
-			if (_uiPaperListAdapter == null)
-			{
-				_uiPaperListAdapter = new SimpleAdapter(PaperListWnd.this,
-														_paperMapList,
-														R.layout.paper_list_item,
-														new String[] {"title", 
-																	  "date", 
-																	  "author"},
-														new int[] {R.id.paperitem_title, 
-																   R.id.paperitem_date, 
-																   R.id.paperitem_author});
-				_uiPaperList.setAdapter(_uiPaperListAdapter);
-			}
-			else
-			{
-				/* notify the view that the data has changed. */
-				_uiPaperListAdapter.notifyDataSetChanged();
-			}
-			
-			if (_uiBusyBox != null)
-			{
-				_uiBusyBox.dismiss();
-				_uiBusyBox = null;
-			}
-			
-			_isLoading = false;
-		}
-	}
-	
-	/**
-	 * error handler.
-	 */
-	private class ExceptionHandler extends Handler
-	{
-		/**
-		 * 
-		 */
-		public ExceptionHandler(Looper looper)
-		{
-			super(looper);
-		}
-		
-		/**
-		 * handler.
-		 */
-		@Override
-		public void handleMessage(Message msg)
-		{
-			/* dismiss busy box if any. */
-			if (_uiBusyBox != null)
-			{
-				_uiBusyBox.dismiss();
-				_uiBusyBox = null;
-			}
-			
-			_isLoading = false;
-			
-			/* show error message. */
-			UiUtils.showErrorMessage(PaperListWnd.this, (String)msg.obj);
 		}
 	}
 	
@@ -259,31 +212,12 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 		/* gesture detector. */
 		_gestureDetector = new GestureDetector(this, new myGestureListener());
 		
+		/* show busy box. */
+		_uiBusyBox = ProgressDialog.show(this, "",
+										 getResources().getText(R.string.loading_please_wait));
 		
-		try
-		{
-			String service=Context.CONNECTIVITY_SERVICE;
-			ConnectivityManager connectivity=(ConnectivityManager) getSystemService(service);
-			NetworkInfo wifiNetwork=connectivity.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-			NetworkInfo mobiNetwork=connectivity.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-			if(wifiNetwork.getState()==NetworkInfo.State.CONNECTED||mobiNetwork.getState()==NetworkInfo.State.CONNECTED)
-			{
-	
-				/* show busy box. */
-				_uiBusyBox = ProgressDialog.show(this, "",
-												 getResources().getText(R.string.loading_please_wait));
-			ArxivLoadingThread t = new ArxivLoadingThread();
-			t.start();
-			}
-			else{
-				/* show no network  box. */
-				UiUtils.showErrorMessage(this, getResources().getString(R.string.No_Network));
-			}
-		}
-		catch (Exception e)
-		{
-			UiUtils.showErrorMessage(this, e.getMessage());
-		}
+		ArxivLoadingThread t = new ArxivLoadingThread();
+		t.start();
 	}
 	
 	/**
