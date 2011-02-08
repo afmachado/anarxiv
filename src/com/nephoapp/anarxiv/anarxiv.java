@@ -250,7 +250,6 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 	 */
 	public void onTabChanged(String tabId) 
 	{
-		// TODO Auto-generated method stub
 		_currentTabId = tabId;
 		
 		/* tab recent is clicked. */

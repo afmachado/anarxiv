@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @author lihe
  *
  * class for downloading pdf files from arxiv.
  */
@@ -73,7 +72,7 @@ public class ArxivFileDownloader
 	{
 		try
 		{
-			/* open the url. */
+			 /* open the url. */
 			URL url = new URL(urlName);
 			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 			

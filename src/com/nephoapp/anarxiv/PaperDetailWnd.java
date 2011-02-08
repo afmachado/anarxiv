@@ -58,7 +58,7 @@ public class PaperDetailWnd extends Activity
 	/**
 	 * gesture detector.
 	 */
-	private GestureDetector _gestureDetector = null;
+	private  GestureDetector _gestureDetector = null;
 	
 	/**
 	 * downloader.
