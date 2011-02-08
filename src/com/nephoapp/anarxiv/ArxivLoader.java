@@ -114,7 +114,7 @@ public class ArxivLoader {
 	public void reset()
 	{
 		_qStart = 0;
-		_qCat = null;
+		 _qCat = null;
 	}
 	public List<Map<String, Object>> loadPapers(String category) throws LoaderException
 	{

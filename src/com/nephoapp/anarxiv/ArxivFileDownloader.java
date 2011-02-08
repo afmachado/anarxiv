@@ -72,7 +72,7 @@ public class ArxivFileDownloader
 	{
 		try
 		{
-			/* open the url. */
+			 /* open the url. */
 			URL url = new URL(urlName);
 			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 			

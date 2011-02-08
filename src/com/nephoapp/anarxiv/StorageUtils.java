@@ -43,7 +43,7 @@ public class StorageUtils
 	 */
 	public static boolean isExternalStorageReadOnly()
 	{
-		String state = Environment.getExternalStorageState();
+		String  state = Environment.getExternalStorageState();
 		
 		if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state) == true)
 			return true;
