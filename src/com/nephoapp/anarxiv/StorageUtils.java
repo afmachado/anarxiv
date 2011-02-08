@@ -20,11 +20,7 @@ import java.io.File;
 
 import android.os.Environment;
 
-/**
- * @author lihe
- * 
- * Utilities for manage storages.
- */
+
 public class StorageUtils 
 {
 	/**

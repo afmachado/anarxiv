@@ -16,10 +16,7 @@
 
 package com.nephoapp.anarxiv;
 
-/**
- * @author lihe
- *
- */
+
 public class ConstantTable 
 {
 	/** timeout for loading paper list. */

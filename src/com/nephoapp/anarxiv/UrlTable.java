@@ -23,7 +23,6 @@ import java.util.TreeMap;
  * This class stores url and corresponding descriptions that will be displayed 
  * on the gui.
  * 
- * @author lihe
  *
  */
 public class UrlTable 

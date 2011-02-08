@@ -46,10 +46,7 @@ import android.widget.TextView;
 import android.view.KeyEvent;
 
 
-/**
- * @author lihe
- *
- */
+
 public class PaperListWnd extends Activity implements OnItemClickListener, OnScrollListener
 {
 	/** ui components. */
