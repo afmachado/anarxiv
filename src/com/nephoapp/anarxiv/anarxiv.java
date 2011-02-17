@@ -230,6 +230,7 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 				Intent intent = new Intent(this, PaperListWnd.class);
 				intent.putExtra("category", (String)itemData.get("queryword"));
 				intent.putExtra("categoryname", (String)itemData.get("name"));
+				intent.putExtra("parentcat", (String) itemData.get("parent"));
 				startActivity(intent);
 			}
 			else if (_RecentTabState == R.id.mainmenu_recent_paper)
@@ -252,6 +253,7 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 				Intent intent = new Intent(this, PaperListWnd.class);
 				intent.putExtra("category", (String)itemData.get("queryword"));
 				intent.putExtra("categoryname", (String)itemData.get("name"));
+				intent.putExtra("parentcat", (String) itemData.get("parent"));
 				startActivity(intent);
 			}
 			else if (_FavoriteTabState == R.id.mainmenu_favorite_paper)

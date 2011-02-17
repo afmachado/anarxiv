@@ -23,6 +23,7 @@ import java.util.Map;
 
 import com.nephoapp.anarxiv.R;
 
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -31,6 +32,7 @@ import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -72,7 +74,8 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 	
 	/** the descriptive name of the category. */
 	private String _paperCategoryName = null;
-	
+	/**  the name of parent catgory                        */
+	private String _paperParentCat=null;
 	/** newly loaded paper list. */
 //	private ArrayList<ArxivLoader.Paper> _newPaperList = null;
 	
@@ -211,6 +214,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 		Intent intent = getIntent();
 		_paperCategory = intent.getStringExtra("category");
 		_paperCategoryName = intent.getStringExtra("categoryname");
+		_paperParentCat=intent.getStringExtra("parentcat");
 		
 		/* get ui components. */
 		_uiPaperList = (ListView)findViewById(R.id.paperlist);
@@ -368,4 +372,53 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 		
 		return super.onContextItemSelected(item);
 	}
+	
+	/**
+	 * create options menu.
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		super.onCreateOptionsMenu(menu);
+		
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu_paperlistwnd, menu);
+		return true;
+	}
+	
+
+	/**
+	 * handle options menu.
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		if (item.getItemId() == R.id.menu_paperlistwind_add_to_favorite)
+		{
+		
+			
+			/* fill in category info. */
+			AnarxivDB.Category category = new AnarxivDB.Category();
+			category._name = _paperCategoryName;
+			category._parent =_paperParentCat;
+			category._queryWord = _paperCategory;
+			
+			/* add to db. */
+			try
+			{
+				AnarxivDB.getInstance().addFavoriteCategory(category);
+				UiUtils.showToast(this, "Added to favorite: " +_paperCategoryName);
+			}
+			catch (AnarxivDB.DBException e)
+			{
+				UiUtils.showToast(this, e.getMessage());
+			}
+		}
+		
+		
+		
+		return super.onOptionsItemSelected(item);
+	}
+	
+	
 }

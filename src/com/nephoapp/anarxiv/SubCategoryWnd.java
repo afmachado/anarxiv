@@ -138,6 +138,7 @@ public class SubCategoryWnd extends Activity implements OnItemClickListener
 			Intent intent = new Intent(this, PaperListWnd.class);
 			intent.putExtra("category", qstring);
 			intent.putExtra("categoryname", catName);
+			intent.putExtra("parentcat", _subCatName);
 			startActivity(intent);
 		}
 	}
