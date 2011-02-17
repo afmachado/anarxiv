@@ -399,7 +399,7 @@ public class AnarxivDB
 	public long addFavoritePaper(Paper paper) throws DBException
 	{
 		try
-		{
+		{   _sqliteDB.delete(AnarxivDB._tbl_FavoritePaper, "_id = '" + paper._id + "'", null);
 			return _sqliteDB.insert(AnarxivDB._tbl_FavoritePaper, null, AnarxivDB.paperToContentValues(paper));
 		}
 		catch (SQLiteException e)
@@ -441,7 +441,7 @@ public class AnarxivDB
 	public long addFavoriteCategory(Category category) throws DBException
 	{
 		try
-		{
+		{   _sqliteDB.delete(AnarxivDB._tbl_FavoriteCategory, "_name = '" + category._name + "' and _parent = '" + category._parent +"'", null);
 			return _sqliteDB.insert(AnarxivDB._tbl_FavoriteCategory, null, AnarxivDB.categoryToContentValues(category));
 		}
 		catch (SQLiteException e)
