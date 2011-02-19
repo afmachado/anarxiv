@@ -193,7 +193,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 		public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) 
 		{
 			// TODO Auto-generated method stub
-			UiUtils.showToast(PaperListWnd.this, "backkey pressed");
+			UiUtils.showToast(PaperListWnd.this, "back key pressed");
 			return true;
 		}
 	}
