@@ -118,8 +118,30 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 				/* get data. */
 				List<Map<String, Object>> paperMapList = _arxivLoader.loadPapers(_paperCategory);
 				_paperMapList.addAll(paperMapList);
-				
-				
+				/* write db cachedpaper*/
+				try
+				{
+					AnarxivDB db = AnarxivDB.getInstance();
+					
+					for( Map<String, Object> paperitem : _paperMapList)
+					{
+						/* fill out the paper object and add to database. */
+						AnarxivDB.Paper paper = new AnarxivDB.Paper();
+						paper._author = (String)paperitem.get("author");
+						paper._date = (String)paperitem.get("date");
+						paper._id = (String)paperitem.get("id");
+						paper._title = (String)paperitem.get("title");
+						paper._url = (String)paperitem.get("url");
+						
+						db.addCachedPaperlist(paper, _paperCategoryName );
+						
+					}
+					
+				}
+				catch (AnarxivDB.DBException e)
+				{
+				//	UiUtils.showToast(this, e.getMessage());
+				}
 				
 				
 				PaperListWnd.this.runOnUiThread(new Runnable()
@@ -255,29 +277,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 //		_uiBusyBox.setOnKeyListener(t);
 		t.start();
 		
-		try
-		{
-			AnarxivDB db = AnarxivDB.getInstance();
-			
-			for( Map<String, Object> paperitem : _paperMapList)
-			{
-				/* fill out the paper object and add to database. */
-				AnarxivDB.Paper paper = new AnarxivDB.Paper();
-				paper._author = (String)paperitem.get("author");
-				paper._date = (String)paperitem.get("date");
-				paper._id = (String)paperitem.get("id");
-				paper._title = (String)paperitem.get("title");
-				paper._url = (String)paperitem.get("url");
-				
-				db.addCachedPaperlist(paper, _paperCategoryName );
-				
-			}
-			
-		}
-		catch (AnarxivDB.DBException e)
-		{
-			UiUtils.showToast(this, e.getMessage());
-		}
+		
 	
 	}
 	
