@@ -211,8 +211,8 @@ public class AnarxivDB
 		/* query the database. */
 		Cursor c = _sqliteDB.query(table, 
 								   new String[] {"_id", "_author", "_title", "_date", "_url"}, 
-								   "_category = " + "'"+category + "'", 
-								   null, 
+								   "_category = ?", 
+								   new String[] {category}, 
 								   null, 
 								   null, 
 								   "db_id desc",

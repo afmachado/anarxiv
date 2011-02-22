@@ -67,7 +67,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 	/** whether loading thread is running. */
 	private boolean _isLoading = false;
 	
-	private static boolean cachedbefore=false;
+	private static boolean _cachedBefore=false;
 	
 	/** arxiv loader. */
 	private ArxivLoader _arxivLoader = ArxivLoader.getInstance();
@@ -127,7 +127,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 							public void run()
 							{
 								
-								cachedbefore=true;
+								_cachedBefore=true;
 								if (_uiPaperListAdapter == null)
 								{
 									_uiPaperListAdapter = new SimpleAdapter(PaperListWnd.this,
@@ -241,7 +241,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 		/* gesture detector. */
 		_gestureDetector = new GestureDetector(this, new myGestureListener());
 		
-		if ( cachedbefore)
+		if (_cachedBefore)
 		{
 			loadCachedPaperlist();
 			
