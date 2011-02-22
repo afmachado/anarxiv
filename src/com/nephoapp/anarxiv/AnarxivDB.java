@@ -128,7 +128,7 @@ public class AnarxivDB
 		                    "_id text, " +
 		                    "_title text, " +
 		                    "_author text, " +
-		                    "_url text" +
+		                    "_url text, " +
 		                    "_category text)";
 	
 	/**
@@ -211,8 +211,8 @@ public class AnarxivDB
 		/* query the database. */
 		Cursor c = _sqliteDB.query(table, 
 								   new String[] {"_id", "_author", "_title", "_date", "_url"}, 
-								   "_category = ?", 
-								   new String[] {category}, 
+								   "_category = " + "'" + category + "'", 
+								   null, 
 								   null, 
 								   null, 
 								   "db_id desc",
