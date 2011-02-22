@@ -56,6 +56,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 	
 	/** adapter for paper list. */
 	SimpleAdapter _uiPaperListAdapter = null;
+	SimpleAdapter _uiPaperListAdapter1 = null;
 	
 	/** gesture detector. */
 	private GestureDetector _gestureDetector = null;
@@ -65,6 +66,8 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 	
 	/** whether loading thread is running. */
 	private boolean _isLoading = false;
+	
+	private static boolean cachedbefore=false;
 	
 	/** arxiv loader. */
 	private ArxivLoader _arxivLoader = ArxivLoader.getInstance();
@@ -116,10 +119,15 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 				List<Map<String, Object>> paperMapList = _arxivLoader.loadPapers(_paperCategory);
 				_paperMapList.addAll(paperMapList);
 				
+				
+				
+				
 				PaperListWnd.this.runOnUiThread(new Runnable()
 						{
 							public void run()
 							{
+								
+								cachedbefore=true;
 								if (_uiPaperListAdapter == null)
 								{
 									_uiPaperListAdapter = new SimpleAdapter(PaperListWnd.this,
@@ -133,7 +141,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 																					   R.id.paperitem_author});
 									_uiPaperList.setAdapter(_uiPaperListAdapter);
 								}
-								else
+	   						  else
 								{
 									/* notify the view that the data has changed. */
 									_uiPaperListAdapter.notifyDataSetChanged();
@@ -233,6 +241,12 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 		/* gesture detector. */
 		_gestureDetector = new GestureDetector(this, new myGestureListener());
 		
+		if ( cachedbefore)
+		{
+			loadCachedPaperlist();
+			
+		}
+		
 		/* show busy box. */
 		_uiBusyBox = ProgressDialog.show(this, "",
 										 getResources().getText(R.string.loading_please_wait));
@@ -240,7 +254,69 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 		ArxivLoadingThread t = new ArxivLoadingThread();
 //		_uiBusyBox.setOnKeyListener(t);
 		t.start();
+		
+		try
+		{
+			AnarxivDB db = AnarxivDB.getInstance();
+			
+			for( Map<String, Object> paperitem : _paperMapList)
+			{
+				/* fill out the paper object and add to database. */
+				AnarxivDB.Paper paper = new AnarxivDB.Paper();
+				paper._author = (String)paperitem.get("author");
+				paper._date = (String)paperitem.get("date");
+				paper._id = (String)paperitem.get("id");
+				paper._title = (String)paperitem.get("title");
+				paper._url = (String)paperitem.get("url");
+				
+				db.addCachedPaperlist(paper, _paperCategoryName );
+				
+			}
+			
+		}
+		catch (AnarxivDB.DBException e)
+		{
+			UiUtils.showToast(this, e.getMessage());
+		}
+	
 	}
+	
+	/**
+	 * load cachedpaperlist from database.
+	 */
+	private void loadCachedPaperlist()
+	{
+		try
+		{
+			/* display recently access paper. */
+			AnarxivDB db = AnarxivDB.getInstance();
+			List<HashMap<String, Object>>  paperMapList = AnarxivDB.paperListToMapList(db.getCachedPaperlist(-1, _paperCategoryName ));
+			_paperMapList.addAll(paperMapList);
+				
+				
+					_uiPaperListAdapter1 = new SimpleAdapter(PaperListWnd.this,
+							                                _paperMapList,
+															R.layout.paper_list_item,
+															new String[] {"title", 
+																		  "date", 
+																		  "author"},
+															new int[] {R.id.paperitem_title, 
+																	   R.id.paperitem_date, 
+																	   R.id.paperitem_author});
+					_uiPaperList.setAdapter(_uiPaperListAdapter1);
+				
+				
+				
+			
+			
+		}
+		catch (AnarxivDB.DBException e)
+		{
+			UiUtils.showToast(this, e.getMessage());
+		}
+	}
+	
+	
 	
 	/**
 	 * intercept all touch event for gesture detector.
@@ -279,6 +355,10 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 		{
 			UiUtils.showToast(this, e.getMessage());
 		}
+		
+		
+		
+		
 		
 		Intent intent = new Intent(this, PaperDetailWnd.class);
 		intent.putExtra("paperdetail", item);

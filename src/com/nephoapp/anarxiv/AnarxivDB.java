@@ -88,6 +88,7 @@ public class AnarxivDB
 	private static final String _tbl_FavoritePaper = "favorite_paper";
 	private static final String _tbl_RecentCategory = "recent_category";
 	private static final String _tbl_FavoriteCategory = "favorite_category";
+	private static final String _tbl_CachedPaperlist = "CachedPaperlist";
 	
 	/**
 	 * table creation statements.
@@ -120,6 +121,15 @@ public class AnarxivDB
 							"_name text, " +
 							"_parent text, " +
 							"_queryword text)";
+	private static final String _createTbl_CachedPaperlist = 
+		                    "create table if not exists " + AnarxivDB._tbl_CachedPaperlist + 
+		                    "(db_id integer primary key autoincrement, " +
+		                    "_date text, " +
+		                    "_id text, " +
+		                    "_title text, " +
+		                    "_author text, " +
+		                    "_url text" +
+		                    "_category text)";
 	
 	/**
 	 * the sqlite database object.
@@ -171,6 +181,37 @@ public class AnarxivDB
 		Cursor c = _sqliteDB.query(table, 
 								   new String[] {"_id", "_author", "_title", "_date", "_url"}, 
 								   null, 
+								   null, 
+								   null, 
+								   null, 
+								   "db_id desc",
+								   limit < 0 ? null : limit.toString());
+		c.moveToFirst();
+		
+		ArrayList<Paper> paperList = new ArrayList<Paper>();
+		
+		for (int i = 0; i < c.getCount(); i ++)
+		{
+			Paper paper = new Paper();
+			paper._author = c.getString(c.getColumnIndex("_author"));
+			paper._date = c.getString(c.getColumnIndex("_date"));
+			paper._id = c.getString(c.getColumnIndex("_id"));
+			paper._title = c.getString(c.getColumnIndex("_title"));
+			paper._url = c.getString(c.getColumnIndex("_url"));
+			
+			paperList.add(paper);
+			c.moveToNext();
+		}
+		
+		return paperList;
+	}
+	
+	private ArrayList<Paper> retrieveCachedPaperlistFromDB(String table, Integer limit, String category)
+	{
+		/* query the database. */
+		Cursor c = _sqliteDB.query(table, 
+								   new String[] {"_id", "_author", "_title", "_date", "_url"}, 
+								   "_category = " + "'"+category + "'", 
 								   null, 
 								   null, 
 								   null, 
@@ -315,6 +356,7 @@ public class AnarxivDB
 				_sqliteDB.execSQL(AnarxivDB._createTbl_FavoritePaper);
 				_sqliteDB.execSQL(AnarxivDB._createTbl_RecentCategory);
 				_sqliteDB.execSQL(AnarxivDB._createTbl_FavoriteCategory);
+				_sqliteDB.execSQL(AnarxivDB._createTbl_CachedPaperlist);
 			}
 		}
 		catch (SQLiteException e)
@@ -347,6 +389,33 @@ public class AnarxivDB
 		}
 	}
 	
+	public long addCachedPaperlist(Paper paper, String category) throws DBException
+	{
+		try
+		{
+			//_sqliteDB.delete(AnarxivDB._tbl_CachedPaperlist, "_category = '" + category+ "'", null);
+			return _sqliteDB.insert(AnarxivDB._tbl_CachedPaperlist, null, AnarxivDB.cachedpaperlistToContentValues(paper,category));
+		}
+		catch (SQLiteException e)
+		{
+			throw new DBException(e.getMessage(), e);
+		}
+	}
+	
+	public static ContentValues cachedpaperlistToContentValues(Paper paper,
+			String category) {
+		// TODO Auto-generated method stub
+		
+		ContentValues cv = new ContentValues();
+		cv.put("_id", paper._id);
+		cv.put("_date", paper._date);
+		cv.put("_title", paper._title);
+		cv.put("_url", paper._url);
+		cv.put("_author", paper._author);
+		cv.put("_category", category);
+		return cv;
+	}
+
 	/**
 	 * remove all recent papers.
 	 */
@@ -505,6 +574,17 @@ public class AnarxivDB
 		}
 	}
 	
+	public ArrayList<Paper> getCachedPaperlist(Integer limit, String category) throws DBException
+	{
+		try
+		{
+			return retrieveCachedPaperlistFromDB(AnarxivDB._tbl_CachedPaperlist, limit, category);
+		}
+		catch (SQLiteException e)
+		{
+			throw new DBException(e.getMessage(), e);
+		}
+	}
 	/**
 	 * get favorite category list.
 	 */
