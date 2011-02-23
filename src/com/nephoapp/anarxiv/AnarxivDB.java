@@ -215,7 +215,7 @@ public class AnarxivDB
 								   null, 
 								   null, 
 								   null, 
-								   "db_id desc",
+								   "db_id asc",
 								   limit < 0 ? null : limit.toString());
 		c.moveToFirst();
 		
@@ -392,8 +392,13 @@ public class AnarxivDB
 	public long addCachedPaperlist(Paper paper, String category) throws DBException
 	{
 		try
-		{
-			//_sqliteDB.delete(AnarxivDB._tbl_CachedPaperlist, "_category = '" + category+ "'", null);
+		{   String where = "_author = '" + paper._author + 
+			   "' and _date = '" + paper._date + 
+			   "' and _id = '" + paper._id +
+			   "' and _title = '" + paper._title + 
+			   "' and _url = '" + paper._url + 
+			   "' and _category = '" + category + "'";
+			_sqliteDB.delete(AnarxivDB._tbl_CachedPaperlist, where, null);
 			return _sqliteDB.insert(AnarxivDB._tbl_CachedPaperlist, null, AnarxivDB.cachedpaperlistToContentValues(paper,category));
 		}
 		catch (SQLiteException e)
@@ -424,6 +429,20 @@ public class AnarxivDB
 		try
 		{
 			return _sqliteDB.delete(AnarxivDB._tbl_RecentPaper, null, null);
+		}
+		catch (SQLiteException e)
+		{
+			throw new DBException(e.getMessage(), e);
+		}
+	}
+	/**
+	 * remove all given category's cachedpaperlist.
+	 */
+	public int removeAllCachedPaperlist(String category) throws DBException
+	{
+		try
+		{
+			return _sqliteDB.delete(AnarxivDB._tbl_CachedPaperlist, "_category = " + "'" + category + "'" , null);
 		}
 		catch (SQLiteException e)
 		{

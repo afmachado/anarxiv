@@ -35,6 +35,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.nephoapp.anarxiv.AnarxivDB.DBException;
+
 public class ArxivLoader {
 	/**
 	 * loader exception.
@@ -116,7 +118,7 @@ public class ArxivLoader {
 		_qStart = 0;
 		_qCat = null;
 	}
-	public List<Map<String, Object>> loadPapers(String category) throws LoaderException
+	public List<Map<String, Object>> loadPapers(String category) throws LoaderException, DBException
 	{
 		/* invalid query string. */
 		if(category == null || category.equals(""))
@@ -128,6 +130,9 @@ public class ArxivLoader {
 		{
 			_qCat = category;
 			_qStart = 0;
+			AnarxivDB db = AnarxivDB.getInstance();
+			
+			db.removeAllCachedPaperlist( category);
 		}
 		
 		/* get url. */

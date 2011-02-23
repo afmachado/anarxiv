@@ -21,17 +21,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.nephoapp.anarxiv.R;
-
-
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -45,7 +46,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.view.KeyEvent;
 
 public class PaperListWnd extends Activity implements OnItemClickListener, OnScrollListener
 {
@@ -67,7 +67,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 	/** whether loading thread is running. */
 	private boolean _isLoading = false;
 	
-	private static boolean _cachedBefore=false;
+//	private static boolean _cachedBefore=false;
 	
 	/** arxiv loader. */
 	private ArxivLoader _arxivLoader = ArxivLoader.getInstance();
@@ -84,7 +84,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 	
 	/** paper map list. */
 	private List<Map<String, Object>> _paperMapList = new ArrayList<Map<String, Object>>();
-	
+	private List<Map<String, Object>> _paperMapList1 = new ArrayList<Map<String, Object>>();
 	/**
 	 * gesture handler.
 	 */
@@ -123,7 +123,9 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 				{
 					AnarxivDB db = AnarxivDB.getInstance();
 					
-					for( Map<String, Object> paperitem : _paperMapList)
+					
+					
+					for( Map<String, Object> paperitem : paperMapList)
 					{
 						/* fill out the paper object and add to database. */
 						AnarxivDB.Paper paper = new AnarxivDB.Paper();
@@ -133,7 +135,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 						paper._title = (String)paperitem.get("title");
 						paper._url = (String)paperitem.get("url");
 						
-						db.addCachedPaperlist(paper, _paperCategoryName );
+						db.addCachedPaperlist(paper,_paperCategory );
 						
 					}
 					
@@ -149,7 +151,7 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 							public void run()
 							{
 								
-								_cachedBefore=true;
+								//_cachedBefore=true;
 								if (_uiPaperListAdapter == null)
 								{
 									_uiPaperListAdapter = new SimpleAdapter(PaperListWnd.this,
@@ -263,19 +265,29 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 		/* gesture detector. */
 		_gestureDetector = new GestureDetector(this, new myGestureListener());
 		
-		if (_cachedBefore)
+		String service=Context.CONNECTIVITY_SERVICE;
+		ConnectivityManager connectivity=(ConnectivityManager) getSystemService(service);
+		NetworkInfo wifiNetwork=connectivity.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		NetworkInfo mobiNetwork=connectivity.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+		if(wifiNetwork.getState()==NetworkInfo.State.CONNECTED||mobiNetwork.getState()==NetworkInfo.State.CONNECTED)
 		{
+
+			/* show busy box. */
+			_uiBusyBox = ProgressDialog.show(this, "",
+											 getResources().getText(R.string.loading_please_wait));
+		ArxivLoadingThread t = new ArxivLoadingThread();
+		t.start();
+		}
+		else{
+			UiUtils.showToast(this, "No Network Connection, Show the Cached History");
 			loadCachedPaperlist();
-			
+			/* show no network  box. */
+		//	UiUtils.showErrorMessage(this, getResources().getString(R.string.No_Network));
 		}
 		
-		/* show busy box. */
-		_uiBusyBox = ProgressDialog.show(this, "",
-										 getResources().getText(R.string.loading_please_wait));
 		
-		ArxivLoadingThread t = new ArxivLoadingThread();
-//		_uiBusyBox.setOnKeyListener(t);
-		t.start();
+
+		
 		
 		
 	
@@ -290,12 +302,13 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 		{
 			/* display recently access paper. */
 			AnarxivDB db = AnarxivDB.getInstance();
-			List<HashMap<String, Object>>  paperMapList = AnarxivDB.paperListToMapList(db.getCachedPaperlist(-1, _paperCategoryName ));
-			_paperMapList.addAll(paperMapList);
+			List<HashMap<String, Object>>  paperMapList = AnarxivDB.paperListToMapList(db.getCachedPaperlist(-1, _paperCategory));
+			//_paperMapList.clear();
+			_paperMapList1.addAll(paperMapList);
 				
 				
 					_uiPaperListAdapter1 = new SimpleAdapter(PaperListWnd.this,
-							                                _paperMapList,
+							                                _paperMapList1,
 															R.layout.paper_list_item,
 															new String[] {"title", 
 																		  "date", 
@@ -334,35 +347,56 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 	public void onItemClick(AdapterView<?> a, View v, int position, long id) 
 	{
 		// TODO Auto-generated method stub
-		@SuppressWarnings("unchecked")
-		HashMap<String, Object> item = (HashMap<String, Object>)a.getItemAtPosition(position);
 		
-		try
+		// run only when there is the connection
+		String service=Context.CONNECTIVITY_SERVICE;
+		ConnectivityManager connectivity=(ConnectivityManager) getSystemService(service);
+		NetworkInfo wifiNetwork=connectivity.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		NetworkInfo mobiNetwork=connectivity.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+		if(wifiNetwork.getState()==NetworkInfo.State.CONNECTED||mobiNetwork.getState()==NetworkInfo.State.CONNECTED)
 		{
-			AnarxivDB db = AnarxivDB.getInstance();
+			@SuppressWarnings("unchecked")
+			HashMap<String, Object> item = (HashMap<String, Object>)a.getItemAtPosition(position);
 			
-			/* fill out the paper object and add to database. */
-			AnarxivDB.Paper paper = new AnarxivDB.Paper();
-			paper._author = (String)item.get("author");
-			paper._date = (String)item.get("date");
-			paper._id = (String)item.get("id");
-			paper._title = (String)item.get("title");
-			paper._url = (String)item.get("url");
+			try
+			{
+				AnarxivDB db = AnarxivDB.getInstance();
+				
+				/* fill out the paper object and add to database. */
+				AnarxivDB.Paper paper = new AnarxivDB.Paper();
+				paper._author = (String)item.get("author");
+				paper._date = (String)item.get("date");
+				paper._id = (String)item.get("id");
+				paper._title = (String)item.get("title");
+				paper._url = (String)item.get("url");
+				
+				db.addRecentPaper(paper);
+			}
+			catch (AnarxivDB.DBException e)
+			{
+				UiUtils.showToast(this, e.getMessage());
+			}
 			
-			db.addRecentPaper(paper);
+			
+			
+			if (a.getAdapter()==_uiPaperListAdapter)
+			{
+				Intent intent = new Intent(this, PaperDetailWnd.class);
+				intent.putExtra("paperdetail", item);
+				startActivity(intent);
+				
+			} else if (a.getAdapter()==_uiPaperListAdapter1)
+			{
+				Intent intent = new Intent(this, PaperDetailWnd_2.class);
+				intent.putExtra("id", (String)item.get("id"));
+				startActivity(intent);
+			}
+			
+			
 		}
-		catch (AnarxivDB.DBException e)
-		{
-			UiUtils.showToast(this, e.getMessage());
-		}
 		
 		
 		
-		
-		
-		Intent intent = new Intent(this, PaperDetailWnd.class);
-		intent.putExtra("paperdetail", item);
-		startActivity(intent);
 	}
 
 	/**
@@ -370,32 +404,42 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 	 */
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) 
 	{
-		// TODO Auto-generated method stub
-		if(totalItemCount <= 0)
-		{
-			return;
-		}
 		
-		if (firstVisibleItem + visibleItemCount >= _paperMapList.size() && _isLoading == false)
+		
+		// TODO Auto-generated method stub
+		String service=Context.CONNECTIVITY_SERVICE;
+		ConnectivityManager connectivity=(ConnectivityManager) getSystemService(service);
+		NetworkInfo wifiNetwork=connectivity.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		NetworkInfo mobiNetwork=connectivity.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+		if(wifiNetwork.getState()==NetworkInfo.State.CONNECTED||mobiNetwork.getState()==NetworkInfo.State.CONNECTED)
 		{
-			try
-			{
-				ArxivLoadingThread t = new ArxivLoadingThread();
-				t.start();
-					
-				/* show busy box. */
-				_uiBusyBox = ProgressDialog.show(this, 
-												 "",
-												 getResources().
-												 	getText(R.string.loading_please_wait));
-			}
-			catch(IllegalThreadStateException e)
+			if(totalItemCount <= 0)
 			{
 				return;
 			}
 			
-			_isLoading = true;
+			if (firstVisibleItem + visibleItemCount >= _paperMapList.size() && _isLoading == false)
+			{
+				try
+				{
+					ArxivLoadingThread t = new ArxivLoadingThread();
+					t.start();
+						
+					/* show busy box. */
+					_uiBusyBox = ProgressDialog.show(this, 
+													 "",
+													 getResources().
+													 	getText(R.string.loading_please_wait));
+				}
+				catch(IllegalThreadStateException e)
+				{
+					return;
+				}
+				
+				_isLoading = true;
+			}
 		}
+		
 	}
 
 	/**

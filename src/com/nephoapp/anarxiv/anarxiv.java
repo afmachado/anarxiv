@@ -226,6 +226,20 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 			
 			if (_RecentTabState == R.id.mainmenu_recent_category)
 			{
+				/* add rencent category, update the recent category db tb */
+				try
+				{
+					AnarxivDB.Category category = new AnarxivDB.Category();
+					category._name = (String)itemData.get("name");
+					category._parent = (String)itemData.get("parent");
+					category._queryWord = (String)itemData.get("queryword");
+					AnarxivDB.getInstance().addRecentCategory(category);
+				}
+				catch (AnarxivDB.DBException e)
+				{
+					UiUtils.showErrorMessage(this, e.getMessage());
+				}
+				
 				/* start activity, as we do in SubCategoryWnd. */
 				Intent intent = new Intent(this, PaperListWnd.class);
 				intent.putExtra("category", (String)itemData.get("queryword"));
@@ -235,6 +249,26 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 			}
 			else if (_RecentTabState == R.id.mainmenu_recent_paper)
 			{
+				
+				/* add rencent paper, update the recent paper db tbl*/
+				try
+				{
+					AnarxivDB db = AnarxivDB.getInstance();
+					
+					/* fill out the paper object and add to database. */
+					AnarxivDB.Paper paper = new AnarxivDB.Paper();
+					paper._author = (String)itemData.get("author");
+					paper._date = (String)itemData.get("date");
+					paper._id = (String)itemData.get("id");
+					paper._title = (String)itemData.get("title");
+					paper._url = (String)itemData.get("url");
+					
+					db.addRecentPaper(paper);
+				}
+				catch (AnarxivDB.DBException e)
+				{
+					UiUtils.showToast(this, e.getMessage());
+				}
 				/* start activity. */
 				Intent intent = new Intent(this, PaperDetailWnd_2.class);
 				intent.putExtra("id", (String)itemData.get("id"));
