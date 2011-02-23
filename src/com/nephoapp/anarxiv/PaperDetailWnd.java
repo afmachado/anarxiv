@@ -260,6 +260,10 @@ public class PaperDetailWnd extends Activity
 		
 		/* context menu. */
 		registerForContextMenu(_uiSummary);
+		registerForContextMenu(_uiPaperTitle);
+		registerForContextMenu(_uiAuthorList);
+		registerForContextMenu(_uiFileSize);
+		registerForContextMenu(_uiPaperDate);
 		
 		/* gesture detector. */
 		_gestureDetector = new GestureDetector(this, new myGestureListener());
