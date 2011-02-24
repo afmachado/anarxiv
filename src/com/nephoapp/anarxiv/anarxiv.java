@@ -175,7 +175,7 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 		tabspec.setIndicator(res.getString(R.string.tabstr_Favorite));
 //		tabspec.setContent(R.id.favlist);
 		_tabHost.addTab(tabspec);
-		_tabHost.setCurrentTab(1);
+		_tabHost.setCurrentTabByTag(res.getString(R.string.tabid_Recent));
 		
 		// FIXME: set this handler when every thing is done.
 		// the handler is called as soon as it is set.
