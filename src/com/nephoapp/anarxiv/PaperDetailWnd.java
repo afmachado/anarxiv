@@ -343,6 +343,11 @@ public class PaperDetailWnd extends Activity
 				UiUtils.showToast(this, e.getMessage());
 			}
 		}
+		else if (item.getItemId()==R.id.menu_paperdetail_HOME)
+		{
+			Intent intent = new Intent(this, anarxiv.class);
+			startActivity(intent);
+		}
 		
 		return super.onOptionsItemSelected(item);
 	}

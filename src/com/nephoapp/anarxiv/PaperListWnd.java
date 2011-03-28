@@ -538,7 +538,12 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 				UiUtils.showToast(this, e.getMessage());
 			}
 		}
-		
+		if (item.getItemId() == R.id.menu_paperlistwind_HOME)
+		{
+
+			Intent intent = new Intent(this, anarxiv.class);
+			startActivity(intent);
+		}
 		
 		
 		return super.onOptionsItemSelected(item);

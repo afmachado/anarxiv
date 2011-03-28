@@ -40,6 +40,9 @@
 		<activity android:name="PaperDetailWnd_2"
 				  android:configChanges="orientation">
 		</activity>
+	    <activity android:name="preference" 
+                  android:configChanges="orientation">
+        </activity>
 </application>
 
 <uses-permission android:name="android.permission.INTERNET"></uses-permission>

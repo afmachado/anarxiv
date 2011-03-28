@@ -175,7 +175,7 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 		tabspec.setIndicator(res.getString(R.string.tabstr_Favorite));
 //		tabspec.setContent(R.id.favlist);
 		_tabHost.addTab(tabspec);
-		_tabHost.setCurrentTabByTag(res.getString(R.string.tabid_Recent));
+//		_tabHost.setCurrentTabByTag(res.getString(R.string.tabid_Recent));
 		
 		// FIXME: set this handler when every thing is done.
 		// the handler is called as soon as it is set.
@@ -193,6 +193,21 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 //		_gestureDetector = new GestureDetector(this, new myOnGestureListener());
 	}
 
+//    @Override
+//    protected void onRestart ()
+//    {
+//    	super.onRestart();
+//    	_tabHost.setCurrentTabByTag(getResources().getString(R.string.tabid_Recent));
+//    	
+//    }
+//    
+//    @Override
+//    protected void onResume ()
+//    {
+//    	super.onResume();
+//    	_tabHost.setCurrentTabByTag(getResources().getString(R.string.tabid_Recent));
+//    	
+//    }
 	/**
 	 * we have to intercept touch event to get the detector working.
 	 */
@@ -362,6 +377,9 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
+		MenuItem item = menu.findItem(R.id.mainmenu_setting);
+		item.setVisible(true);
+		
 		/* tab: category. */
 		if (getResources().getString(R.string.tabid_Category).equals(_currentTabId))
 		{
@@ -405,8 +423,14 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
+		/*preference setting */
+		if (item.getItemId()==R.id.mainmenu_setting)
+		{
+			Intent intent = new Intent(this, preference.class);
+			startActivity(intent);
+		}
 		/* recent paper. */
-		if (item.getItemId() == R.id.mainmenu_recent_paper)
+		else if (item.getItemId() == R.id.mainmenu_recent_paper)
 		{
 			_RecentTabState = item.getItemId();
 			loadRecentPapers();
@@ -424,6 +448,7 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 			_RecentTabState = item.getItemId();
 			loadRecentCategories();
 		}
+		
 		/* favorite paper. */
 		else if (item.getItemId() == R.id.mainmenu_favorite_paper)
 		{
@@ -750,6 +775,7 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 		item.setVisible(visible);
 		item = menu.findItem(R.id.mainmenu_recent_delete_all);
 		item.setVisible(visible);
+		
 	}
 	
 	/**
@@ -763,6 +789,7 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 		item.setVisible(visible);
 		item = menu.findItem(R.id.mainmenu_favorite_delete_all);
 		item.setVisible(visible);
+	
 	}
 	
 //	/**
