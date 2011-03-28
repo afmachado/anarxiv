@@ -59,10 +59,10 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 	private ListView _uiFavoriteList = null;
 	private Workspace _uiWorkspace = null;
 	
-	/** preference*/
-	private CheckBoxPreference _isCustomized;
-	 private ListPreference _maincat;
-	 private ListPreference _subcat;
+	/**preference*/
+//	 private CheckBoxPreference _isCustomized;
+//	 private ListPreference _maincat;
+//	 private ListPreference _subcat;
 	/** gesture detector. */
 //	private GestureDetector _gestureDetector = null;
 	
@@ -126,12 +126,6 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
     {
     	super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_workspace);
-		//Context context = getApplicationContext();
-	    //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		
-    	
-	     
-		
 		try
 		{
 			/* check app root dir. */
@@ -145,6 +139,50 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 		{
 			UiUtils.showErrorMessage(this, e.getMessage());
 		}
+		
+		
+		/**  dispatch if specify default category*/
+		Context context = getApplicationContext();
+	    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+	    
+	    boolean isCustomized = prefs.getBoolean("isCustomized", false);
+	    if(prefs.getBoolean("isStart", true)&& isCustomized&&prefs.getString("maincat", null)!=null
+	    		&&prefs.getString("subcat", null)!=null)
+	    {
+	    	String catName = prefs.getString("subcat", null);
+			String qstring = anarxiv._urlTbl.getQueryString(catName);
+			
+			/* add to recent category table. */
+			try
+			{
+				AnarxivDB.Category category = new AnarxivDB.Category();
+				category._name = catName;
+				category._parent = prefs.getString("maincat", null);
+				category._queryWord = qstring;
+				AnarxivDB.getInstance().addRecentCategory(category);
+			}
+			catch (AnarxivDB.DBException e)
+			{
+				UiUtils.showErrorMessage(this, e.getMessage());
+			}
+			
+			/* start new activity. */
+			Intent intent = new Intent(this, PaperListWnd.class);
+			intent.putExtra("category", qstring);
+			intent.putExtra("categoryname", catName);
+			intent.putExtra("parentcat", prefs.getString("maincat", null));
+			startActivity(intent);
+	    }
+		
+	    SharedPreferences.Editor editor = prefs.edit();
+	    // isStart is to denote whether anarxiv class is called from starter.
+	    editor.putBoolean("isStart", true);
+	
+	    // Commit the changes.
+	    editor.commit();
+	     
+		
+		
     	
 		/* get resource manager. */
 		Resources res = getResources();

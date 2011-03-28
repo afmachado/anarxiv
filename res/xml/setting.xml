@@ -10,17 +10,17 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
 	android:title="setting" android:key="parent">
-	<PreferenceCategory android:title="Select starting window " />
+	<PreferenceCategory android:title="Set default category" />
 	<CheckBoxPreference android:key="isCustomized"
-		android:title="Customized?" android:summaryOn="Show my selected category"
-		android:summaryOff="Show main window" android:defaultValue="0" />
+		android:title="Show default category?" android:summaryOn="Show my selected category"
+		android:summaryOff="Show Home Window" android:defaultValue="0" />
 
 	<ListPreference android:title="Main Category"
-		android:summary="Select main category" android:key="maincat"
+		android:key="maincat"
 		android:dependency="isCustomized">
 	</ListPreference>
-	<ListPreference android:title="subcategory"
-		android:summary="select subcategory" android:key="subcat"
+	<ListPreference android:title="Subcategory"
+	    android:key="subcat"
 		android:dependency="maincat">
 	</ListPreference>
 </PreferenceScreen>

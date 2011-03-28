@@ -24,9 +24,12 @@ import com.nephoapp.anarxiv.R;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
@@ -345,6 +348,15 @@ public class PaperDetailWnd extends Activity
 		}
 		else if (item.getItemId()==R.id.menu_paperdetail_HOME)
 		{
+
+			 Context context = getApplicationContext();
+			 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+			 SharedPreferences.Editor editor = prefs.edit();
+			    // isStart is to denote whether anarxiv class is called from starter.
+			 editor.putBoolean("isStart", false);
+			
+			    // Commit the changes.
+			 editor.commit();
 			Intent intent = new Intent(this, anarxiv.class);
 			startActivity(intent);
 		}

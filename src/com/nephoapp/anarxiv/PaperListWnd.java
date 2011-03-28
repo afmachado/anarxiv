@@ -26,9 +26,11 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
@@ -238,6 +240,9 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.paper_list);
+		
+	   
+
 		
 		/* reste loader. */
 		_arxivLoader.reset();
@@ -540,7 +545,14 @@ public class PaperListWnd extends Activity implements OnItemClickListener, OnScr
 		}
 		if (item.getItemId() == R.id.menu_paperlistwind_HOME)
 		{
-
+			 Context context = getApplicationContext();
+			 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+			 SharedPreferences.Editor editor = prefs.edit();
+			    // isStart is to denote whether anarxiv class is called from starter.
+			 editor.putBoolean("isStart", false);
+			
+			    // Commit the changes.
+			 editor.commit();
 			Intent intent = new Intent(this, anarxiv.class);
 			startActivity(intent);
 		}
