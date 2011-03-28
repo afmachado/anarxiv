@@ -19,7 +19,7 @@
 		android:summary="Select main category" android:key="maincat"
 		android:dependency="isCustomized">
 	</ListPreference>
-	<ListPreference android:title="Subcategory"
+	<ListPreference android:title="subcategory"
 		android:summary="select subcategory" android:key="subcat"
 		android:dependency="maincat">
 	</ListPreference>

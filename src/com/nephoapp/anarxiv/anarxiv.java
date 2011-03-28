@@ -25,9 +25,14 @@ import com.nephoapp.ui.Workspace;
 import com.nephoapp.ui.TabContainer;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
+import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 //import android.view.GestureDetector;
@@ -54,6 +59,10 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
 	private ListView _uiFavoriteList = null;
 	private Workspace _uiWorkspace = null;
 	
+	/** preference*/
+	private CheckBoxPreference _isCustomized;
+	 private ListPreference _maincat;
+	 private ListPreference _subcat;
 	/** gesture detector. */
 //	private GestureDetector _gestureDetector = null;
 	
@@ -117,7 +126,12 @@ public class anarxiv extends Activity implements AdapterView.OnItemClickListener
     {
     	super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_workspace);
+		//Context context = getApplicationContext();
+	    //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		
     	
+	     
+		
 		try
 		{
 			/* check app root dir. */
